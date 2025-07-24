@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Continuum: The Living Event Ecosystem</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-snap-type: y mandatory;
+        }
+        body {
+            font-family: 'Manrope', sans-serif;
+            background: linear-gradient(135deg, #0a0b14 0%, #1a1b26 50%, #16213e 100%);
+            color: #e5e7eb;
+            overflow-x: hidden;
+            background-attachment: fixed;
+        }
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            position: relative;
+            scroll-snap-align: start;
+        }
+        .glass-box {
+            background: rgba(26, 27, 33, 0.4);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #ffffff, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .feature-icon {
+            width: 4rem;
+            height: 4rem;
+            display: grid;
+            place-items: center;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.2));
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .problem-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            display: grid;
+            place-items: center;
+            border-radius: 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        .phase-indicator {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #60a5fa;
+        }
+        .metric-card {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.05), rgba(167, 139, 250, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .floating-nav {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .nav-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-dot.active {
+            background: #60a5fa;
+            transform: scale(1.2);
+        }
+        .journey-step {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05));
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .solution-step {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .project-card {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.1), rgba(167, 139, 250, 0.1));
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px 0 rgba(96, 165, 250, 0.2);
+        }
+        .feature-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            transition: background 0.3s ease;
+        }
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .tech-stack-item {
+            background: rgba(96, 165, 250, 0.1);
+            border: 1px solid rgba(96, 165, 250, 0.2);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .tech-stack-item:hover {
+            background: rgba(96, 165, 250, 0.2);
+            transform: translateY(-2px);
+        }
+        .demo-screen {
+            background: #1a1b26;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(96, 165, 250, 0.3);
+            border-top: 2px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .profile-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        .profile-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .auth-button {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+        }
+        .insight-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .roi-metric {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Navigation -->
+    <div class="floating-nav hidden md:flex">
+        <div class="nav-dot active" data-slide="0"></div>
+        <div class="nav-dot" data-slide="1"></div>
+        <div class="nav-dot" data-slide="2"></div>
+        <div class="nav-dot" data-slide="3"></div>
+        <div class="nav-dot" data-slide="4"></div>
+        <div class="nav-dot" data-slide="5"></div>
+        <div class="nav-dot" data-slide="6"></div>
+        <div class="nav-dot" data-slide="7"></div>
+        <div class="nav-dot" data-slide="8"></div>
+        <div class="nav-dot" data-slide="9"></div>
+        <div class="nav-dot" data-slide="10"></div>
+        <div class="nav-dot" data-slide="11"></div>
+        <div class="nav-dot" data-slide="12"></div>
+        <div class="nav-dot" data-slide="13"></div>
+        <div class="nav-dot" data-slide="14"></div>
+        <div class="nav-dot" data-slide="15"></div>
+        <div class="nav-dot" data-slide="16"></div>
+        <div class="nav-dot" data-slide="17"></div>
+        <div class="nav-dot" data-slide="18"></div>
+        <div class="nav-dot" data-slide="19"></div>
+    </div>
+
+    <main>
+        <!-- Slide 1: Title -->
+        <section class="slide text-center">
+            <div class="phase-indicator">Introduction</div>
+            <p class="font-semibold text-blue-400 mb-4 text-lg">Project Continuum</p>
+            <h1 class="text-6xl md:text-8xl font-extrabold gradient-text mb-8">The Living Event Ecosystem</h1>
+            <p class="text-xl md:text-2xl text-slate-300 max-w-4xl mb-8">Transforming events from static, transactional databases into dynamic, intelligent systems that reflect the true human-centric value of gathering.</p>
+            <div class="text-center">
+                <span class="bg-blue-500/20 border border-blue-500/30 px-4 py-2 rounded-full text-blue-300 text-sm">Reimagining the Future of Events</span>
+            </div>
+        </section>
+
+        <!-- Slide 2: The Core Problem -->
+        <section class="slide">
+            <div class="phase-indicator">Problem Analysis</div>
+            <div class="max-w-6xl w-full text-center">
+                <h2 class="text-5xl font-bold text-white mb-8">The Systemic Failure</h2>
+                <div class="glass-box mb-8">
+                    <p class="text-xl text-slate-300 leading-relaxed">Modern event platforms are designed as <span class="text-red-400 font-bold">static, transactional databases</span>. They are not living systems that reflect the dynamic, human-centric value of gathering.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-4">Current Reality</h3>
+                        <ul class="text-slate-300 space-y-2 text-left">
+                            <li>🏷️ Topic-based recommendations create echo chambers</li>
+                            <li>❄️ Social cold start on event day</li>
+                            <li>👻 Platforms disappear during the actual event</li>
+                            <li>💨 All value evaporates post-event</li>
+                        </ul>
+                    </div>
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-4">Our Vision</h3>
+                        <ul class="text-green-300 space-y-2 text-left">
+                            <li>🧠 Intelligent, multi-faceted discovery</li>
+                            <li>🔗 Pre-event community building</li>
+                            <li>⚡ Real-time engagement intelligence</li>
+                            <li>♾️ Persistent knowledge ecosystem</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 3: Attendee Pain Points Journey -->
+        <section class="slide">
+            <div class="phase-indicator">Attendee Journey</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">The Journey of Missed Opportunity</h2>
+                <div class="space-y-6">
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">🔍</div>
+                            <h3 class="text-xl font-bold text-white">Discovery: The Event Echo Chamber</h3>
+                        </div>
+                        <p class="text-slate-300 mb-3">Platforms suggest events based on topic tags (#AI, #Marketing), creating self-reinforcing loops. They can't answer crucial questions:</p>
+                        <div class="bg-slate-800/50 p-3 rounded-lg text-sm text-slate-400">
+                            <p>"Which event will have the 3 people I need to meet to get my startup funded?"</p>
+                            <p>"Where are practitioners discussing LangChain failure modes, not just hype?"</p>
+                        </div>
+                    </div>
+                    
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">🧊</div>
+                            <h3 class="text-xl font-bold text-white">Pre-Event: The Social Cold Start</h3>
+                        </div>
+                        <p class="text-slate-300">Between 'Register' and event day, there's a vacuum. Attendees enter as strangers, forcing every interaction to be a cold start. No way to see who's going, what questions they're pondering, or what micro-communities are forming.</p>
+                    </div>
+                    
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">👻</div>
+                            <h3 class="text-xl font-bold text-white">During Event: The Digital Bouncer</h3>
+                        </div>
+                        <p class="text-slate-300">Platform's role is reduced to QR code scanning. Rich, real-time data is lost: applause patterns, coffee machine debates, unasked questions. The platform becomes invisible during the most valuable moments.</p>
+                    </div>
+                    
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">💨</div>
+                            <h3 class="text-xl font-bold text-white">Post-Event: The Great Evaporation</h3>
+                        </div>
+                        <p class="text-slate-300">Massive intellectual, social, and inspirational energy dissipates instantly. Frantic LinkedIn exchanges, dead PDF slides, lost discussions. The platform acts as a container with a hole in the bottom.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 4: Organizer Pain Points -->
+        <section class="slide">
+            <div class="phase-indicator">Organizer Challenges</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">The Frustration of Wasted Potential</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">📣</div>
+                            <h3 class="text-lg font-bold text-white">The Empty Megaphone</h3>
+                        </div>
+                        <p class="text-slate-300 text-sm">Terrible at discovering and attracting the right NEW people. Blunt instruments: social posts, paid ads. No lookalike audiences based on deep interest graphs.</p>
+                    </div>
+                    
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">📊</div>
+                            <h3 class="text-lg font-bold text-white">The Vanity Dashboard</h3>
+                        </div>
+                        <p class="text-slate-300 text-sm">Drowning in shallow data. Can't answer: Which speaker generated most follow-on conversations? Who are the "hidden influencers"? What was the true "Return on Attention"?</p>
+                    </div>
+                    
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">🏢</div>
+                            <h3 class="text-lg font-bold text-white">The Logo-Industrial Complex</h3>
+                        </div>
+                        <p class="text-slate-300 text-sm">Sponsor model based on "exposure" - logos on screens, booths in halls. No way to demonstrate tangible ROI beyond badge scans, which are poor proxies for genuine interest.</p>
+                    </div>
+                    
+                    <div class="journey-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="problem-icon">🌪️</div>
+                            <h3 class="text-lg font-bold text-white">The Community Diaspora</h3>
+                        </div>
+                        <p class="text-slate-300 text-sm">Conversation immediately offloaded to Slack/Discord, fragmenting user experience and breaking contextual links. Platform becomes worst tool for community building.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 5: The Three-Pillar Solution -->
+        <section class="slide">
+            <div class="phase-indicator">Platform Features</div>
+            <div class="max-w-6xl w-full text-center">
+                <h2 class="text-5xl font-bold text-white mb-12">Three Core Feature Pillars</h2>
+                <div class="glass-box mb-8">
+                    <p class="text-xl text-slate-300 leading-relaxed">Our unified event booking platform integrates three revolutionary feature sets to create the world's first truly intelligent event ecosystem.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="project-card">
+                        <div class="text-6xl mb-4">🎯</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Kismet</h3>
+                        <p class="text-slate-300 mb-4">Social Discovery & Networking</p>
+                        <p class="text-sm text-slate-400">AI-powered attendee matching, pre-event cohort building, and real-time social intelligence.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="text-6xl mb-4">📈</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Resonance</h3>
+                        <p class="text-slate-300 mb-4">Analytics & ROI Intelligence</p>
+                        <p class="text-sm text-slate-400">Real-time engagement tracking, sponsor ROI measurement, and influence mapping.</p>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="text-6xl mb-4">♾️</div>
+                        <h3 class="text-2xl font-bold text-white mb-4">Continuum</h3>
+                        <p class="text-slate-300 mb-4">Knowledge Persistence & Community</p>
+                        <p class="text-sm text-slate-400">Transforms events into living knowledge graphs with persistent community value.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 6: Kismet Feature Deep Dive -->
+        <section class="slide">
+            <div class="phase-indicator">Kismet Features</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold gradient-text mb-8 text-center">Kismet: Social Discovery & Networking</h2>
+                <div class="text-center mb-8">
+                    <span class="bg-blue-500/20 border border-blue-500/30 px-4 py-2 rounded-full text-blue-300 text-sm">Integrated Platform Feature</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-4">Feature Overview</h3>
+                        <p class="text-slate-300 mb-6">Event discovery is generic and the pre-event to in-event experience is socially inert, failing to engineer meaningful connections.</p>
+                        
+                        <h4 class="text-lg font-bold text-white mb-3">Core Capabilities</h4>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-icon">🎯</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Multi-faceted Discovery</h5>
+                                    <p class="text-sm text-slate-400">Find events by specific people, companies, skills, or problems. "Events in SF with senior Stripe engineers interested in Rust."</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">👥</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Pre-Event Cohort Pods</h5>
+                                    <p class="text-sm text-slate-400">Auto-created 5-7 person chat groups based on complementary goals: "Find co-founder," "Hire designer," "Learn RAGs."</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">🗺️</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Real-Time Social Heatmap</h5>
+                                    <p class="text-sm text-slate-400">Live, anonymized map showing conversation clusters by topic. "High-density 'Seed Funding' discussion near main stage."</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">⚡</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Serendipity Engine</h5>
+                                    <p class="text-sm text-slate-400">Smart notifications: "Person who asked the question you upvoted is 20 feet away. Sarah is also seeking angel investors."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-4">Business Impact</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-blue-300 mb-2">Target Niche</h4>
+                                <p class="text-sm text-slate-300">Networking-heavy events: founder/investor mixers, large community meetups, social tracks of conferences.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-green-300 mb-2">Revenue Model</h4>
+                                <p class="text-sm text-slate-300">Premium networking features drive platform subscriptions and increase event booking conversion rates.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-bold text-white mb-3">Discovery Effectiveness</h4>
+                            <div class="chart-container">
+                                <canvas id="kismetDiscoveryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 7: Resonance Feature Deep Dive -->
+        <section class="slide">
+            <div class="phase-indicator">Resonance Features</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold gradient-text mb-8 text-center">Resonance: Analytics & ROI Intelligence</h2>
+                <div class="text-center mb-8">
+                    <span class="bg-green-500/20 border border-green-500/30 px-4 py-2 rounded-full text-green-300 text-sm">Integrated Platform Feature</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-4">Feature Overview</h3>
+                        <p class="text-slate-300 mb-6">Sponsors and organizers lack tangible data to measure true engagement and ROI beyond shallow vanity metrics.</p>
+                        
+                        <h4 class="text-lg font-bold text-white mb-3">Core Capabilities</h4>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-icon">🏆</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Sponsor Bounty Board</h5>
+                                    <p class="text-sm text-slate-400">Sponsors post challenges. Attendees submit solutions. Track interactions and submission quality as success metrics.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">🤖</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Smart Booth Intelligence</h5>
+                                    <p class="text-sm text-slate-400">Beyond QR codes: BLE beacons + app interactions analyze dwell time, conversation density, message resonance.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">🕸️</div>
+                                <div>
+                                    <h5 class="font-bold text-white">The Influence Graph</h5>
+                                    <p class="text-sm text-slate-400">Visual map of conversation drivers. "Which sponsor expert was referenced most in other sessions?"</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">📄</div>
+                                <div>
+                                    <h5 class="font-bold text-white">ROI Storytelling</h5>
+                                    <p class="text-sm text-slate-400">Auto-generated reports: "Your FinOps workshop: 75 attendees, 40% C-level, concepts downloaded 150x, Jane connected to 12 qualified leads."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-4">Business Impact</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-blue-300 mb-2">Target Market</h4>
+                                <p class="text-sm text-slate-300">Large B2B trade shows and corporate conferences (Dreamforce, MWC, AWS re:Invent) where sponsor ROI is the primary economic driver.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-green-300 mb-2">Revenue Model</h4>
+                                <p class="text-sm text-slate-300">Premium analytics drive higher-tier platform subscriptions and justify premium pricing for event organizers.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-bold text-white mb-3">ROI Transformation</h4>
+                            <div class="chart-container">
+                                <canvas id="resonanceRoiChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 8: Continuum Feature Deep Dive -->
+        <section class="slide">
+            <div class="phase-indicator">Continuum Features</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold gradient-text mb-8 text-center">Continuum: Knowledge Persistence & Community</h2>
+                <div class="text-center mb-8">
+                    <span class="bg-purple-500/20 border border-purple-500/30 px-4 py-2 rounded-full text-purple-300 text-sm">Integrated Platform Feature</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-4">Feature Overview</h3>
+                        <p class="text-slate-300 mb-6">Transforms events from point-in-time occurrences into persistent, living Knowledge Graphs. Captures intellectual output and makes it explorable, citable, and community-building.</p>
+                        
+                        <h4 class="text-lg font-bold text-white mb-3">Core Capabilities</h4>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-icon">📋</div>
+                                <div>
+                                    <h5 class="font-bold text-white">The Living Agenda</h5>
+                                    <p class="text-sm text-slate-400">Each session becomes a container: transcript, AI summary, moment-by-moment engagement graph, Q&A threads.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">💎</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Knowledge Artifacts</h5>
+                                    <p class="text-sm text-slate-400">Key insights "minted" by attendees, linked to source talks and speakers. Building blocks of community's shared brain.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">🔗</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Connection Provenance</h5>
+                                    <p class="text-sm text-slate-400">"You and John were both engaged during Vector Databases session and asked about performance scaling." Maps connections via shared curiosity.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">🌊</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Post-Event Insight Streams</h5>
+                                    <p class="text-sm text-slate-400">Shows how event ideas evolve, get referenced, connect to new topics. Continuous value delivery.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-4">Business Impact</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-blue-300 mb-2">Perfect Fit</h4>
+                                <p class="text-sm text-slate-300">High-signal, content-heavy technical and scientific conferences (NeurIPS, Strange Loop, PyCon) where information longevity is paramount.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-green-300 mb-2">Revenue Model</h4>
+                                <p class="text-sm text-slate-300">Knowledge persistence features create long-term platform stickiness and enable premium community management subscriptions.</p>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-bold text-green-300 mb-2">Business Model</h4>
+                                <p class="text-sm text-slate-300">B2B SaaS: freemium basic listings, paid tiers for knowledge capture + AI features, enterprise tier for anonymized knowledge graph access.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-bold text-white mb-3">Knowledge Retention</h4>
+                            <div class="chart-container">
+                                <canvas id="continuumKnowledgeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 9: Unified Platform Architecture -->
+        <section class="slide">
+            <div class="phase-indicator">Platform Architecture</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">One Platform, Three Revolutionary Features</h2>
+                <div class="glass-box mb-8 text-center">
+                    <p class="text-xl text-slate-300 leading-relaxed">All three feature pillars work together seamlessly within a single, intelligent event booking platform to create unprecedented value for attendees, organizers, and sponsors.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-box text-center">
+                        <div class="text-4xl mb-4">🔍</div>
+                        <h3 class="text-xl font-bold text-white mb-4">Discovery Phase</h3>
+                        <div class="space-y-3 text-left">
+                            <div class="flex items-center gap-3">
+                                <span class="text-blue-400 text-lg">🎯</span>
+                                <span class="text-sm text-slate-300">Kismet's multi-faceted discovery helps users find perfect events</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-green-400 text-lg">📊</span>
+                                <span class="text-sm text-slate-300">Resonance analytics inform event recommendations</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-purple-400 text-lg">🧠</span>
+                                <span class="text-sm text-slate-300">Continuum's knowledge graph suggests related events</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box text-center">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h3 class="text-xl font-bold text-white mb-4">Event Experience</h3>
+                        <div class="space-y-3 text-left">
+                            <div class="flex items-center gap-3">
+                                <span class="text-blue-400 text-lg">👥</span>
+                                <span class="text-sm text-slate-300">Real-time social heatmaps and serendipity notifications</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-green-400 text-lg">⚡</span>
+                                <span class="text-sm text-slate-300">Live engagement tracking and influence mapping</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-purple-400 text-lg">📝</span>
+                                <span class="text-sm text-slate-300">Real-time knowledge capture and artifact creation</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box text-center">
+                        <div class="text-4xl mb-4">♾️</div>
+                        <h3 class="text-xl font-bold text-white mb-4">Post-Event Value</h3>
+                        <div class="space-y-3 text-left">
+                            <div class="flex items-center gap-3">
+                                <span class="text-blue-400 text-lg">🔗</span>
+                                <span class="text-sm text-slate-300">Connection provenance and follow-up facilitation</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-green-400 text-lg">📈</span>
+                                <span class="text-sm text-slate-300">Comprehensive ROI reports and impact analysis</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-purple-400 text-lg">♾️</span>
+                                <span class="text-sm text-slate-300">Living knowledge graph and persistent community</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- New slide showing platform flow -->
+        <section class="slide">
+            <div class="phase-indicator">User Journey</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Complete User Journey</h2>
+                <div class="space-y-6">
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon text-2xl">🔍</div>
+                            <h3 class="text-xl font-bold text-white">1. Intelligent Discovery</h3>
+                        </div>
+                        <p class="text-slate-300">Users discover events through Kismet's multi-faceted search: by people, skills, problems to solve, or companies attending. AI recommendations based on interest graphs and past behavior.</p>
+                    </div>
+                    
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon text-2xl">📝</div>
+                            <h3 class="text-xl font-bold text-white">2. Seamless Booking & Profile</h3>
+                        </div>
+                        <p class="text-slate-300">One-click booking with Google authentication. Smart profile completion with LinkedIn integration, interest tagging, and goal setting for the event.</p>
+                    </div>
+                    
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon text-2xl">👥</div>
+                            <h3 class="text-xl font-bold text-white">3. Pre-Event Community Building</h3>
+                        </div>
+                        <p class="text-slate-300">Automatic cohort pod creation based on complementary goals. Attendee discovery interface with AI-powered "people you should meet" recommendations and advanced search filters.</p>
+                    </div>
+                    
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon text-2xl">⚡</div>
+                            <h3 class="text-xl font-bold text-white">4. Live Event Intelligence</h3>
+                        </div>
+                        <p class="text-slate-300">Real-time social heatmaps, serendipity notifications, engagement tracking, and live knowledge capture. Sponsors get real-time ROI dashboards and influence mapping.</p>
+                    </div>
+                    
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon text-2xl">♾️</div>
+                            <h3 class="text-xl font-bold text-white">5. Persistent Value Creation</h3>
+                        </div>
+                        <p class="text-slate-300">Knowledge artifacts, connection provenance, insight streams, and community persistence. The event becomes a living asset that continues delivering value long after it ends.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 10: Authentication & User Experience -->
+        <section class="slide">
+            <div class="phase-indicator">User Experience</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Seamless Authentication & Onboarding</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-6">Sign-In Flow</h3>
+                        <div class="demo-screen p-6">
+                            <div class="text-center mb-6">
+                                <h4 class="text-xl font-bold text-white mb-4">Welcome to TechConf 2025</h4>
+                                <p class="text-slate-400 mb-6">Connect with fellow attendees and discover meaningful conversations</p>
+                                <button class="auth-button flex items-center gap-3 mx-auto">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                    </svg>
+                                    Sign in with Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-2xl font-bold text-white mb-6">Profile Completion</h3>
+                        <div class="demo-screen p-6">
+                            <div class="mb-6">
+                                <h4 class="text-lg font-bold text-white mb-4">Complete Your Profile</h4>
+                                <p class="text-slate-400 text-sm mb-4">Help others connect with you</p>
+                                
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">Job Title</label>
+                                        <input type="text" class="w-full p-2 bg-slate-800 border border-slate-600 rounded text-white" placeholder="Senior Software Engineer">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">LinkedIn Profile</label>
+                                        <input type="url" class="w-full p-2 bg-slate-800 border border-slate-600 rounded text-white" placeholder="https://linkedin.com/in/yourprofile">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-300 mb-2">Interests</label>
+                                        <div class="flex flex-wrap gap-2">
+                                            <span class="bg-blue-500/20 border border-blue-500/30 px-3 py-1 rounded-full text-blue-300 text-sm">AI</span>
+                                            <span class="bg-green-500/20 border border-green-500/30 px-3 py-1 rounded-full text-green-300 text-sm">SaaS</span>
+                                            <span class="bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full text-purple-300 text-sm">Investing</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 11: Attendee Discovery Interface -->
+        <section class="slide">
+            <div class="phase-indicator">Discovery Interface</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Intelligent Attendee Discovery</h2>
+                <div class="glass-box">
+                    <div class="demo-screen p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-white">TechConf 2025 Attendees</h3>
+                            <div class="flex items-center gap-4">
+                                <div class="loading-spinner"></div>
+                                <input type="search" class="p-2 bg-slate-800 border border-slate-600 rounded text-white" placeholder="Search attendees...">
+                            </div>
+                        </div>
+                        
+                        <!-- AI Recommendations Section -->
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <span class="feature-icon text-base">🤖</span>
+                                People you should meet
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                                            JD
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white">Jane Doe</h5>
+                                            <p class="text-sm text-slate-400">AI Research Lead</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-300 mb-2">95% match based on shared interests in ML infrastructure</p>
+                                    <a href="#" class="text-blue-400 text-sm hover:underline">View LinkedIn Profile</a>
+                                </div>
+                                
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">
+                                            MS
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white">Mike Smith</h5>
+                                            <p class="text-sm text-slate-400">VP Engineering</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-300 mb-2">Both interested in scaling challenges and team leadership</p>
+                                    <a href="#" class="text-blue-400 text-sm hover:underline">View LinkedIn Profile</a>
+                                </div>
+                                
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold">
+                                            AL
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white">Anna Liu</h5>
+                                            <p class="text-sm text-slate-400">Product Manager</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-slate-300 mb-2">Shared interest in AI product development</p>
+                                    <a href="#" class="text-blue-400 text-sm hover:underline">View LinkedIn Profile</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- All Attendees Grid -->
+                        <div>
+                            <h4 class="text-lg font-bold text-white mb-4">All Attendees (247)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                            AB
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white text-sm">Alex Brown</h5>
+                                            <p class="text-xs text-slate-400">CTO</p>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="text-blue-400 text-xs hover:underline">View Profile</a>
+                                </div>
+                                
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                            CD
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white text-sm">Carol Davis</h5>
+                                            <p class="text-xs text-slate-400">Data Scientist</p>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="text-blue-400 text-xs hover:underline">View Profile</a>
+                                </div>
+                                
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                            EF
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white text-sm">Emma Foster</h5>
+                                            <p class="text-xs text-slate-400">Designer</p>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="text-blue-400 text-xs hover:underline">View Profile</a>
+                                </div>
+                                
+                                <div class="profile-card">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                            GH
+                                        </div>
+                                        <div>
+                                            <h5 class="font-bold text-white text-sm">George Hill</h5>
+                                            <p class="text-xs text-slate-400">Founder</p>
+                                        </div>
+                                    </div>
+                                    <a href="#" class="text-blue-400 text-xs hover:underline">View Profile</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 12: Real-Time Engagement Dashboard -->
+        <section class="slide">
+            <div class="phase-indicator">Engagement Intelligence</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Real-Time Engagement Intelligence</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-4">Live Event Insights</h3>
+                        <div class="space-y-4">
+                            <div class="insight-card">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="feature-icon text-base">🔥</div>
+                                    <h4 class="font-bold text-white">Trending Topics</h4>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-300">Vector Databases</span>
+                                        <span class="bg-red-500/20 text-red-300 px-2 py-1 rounded text-sm">+47%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-300">LangChain Performance</span>
+                                        <span class="bg-orange-500/20 text-orange-300 px-2 py-1 rounded text-sm">+32%</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-300">Seed Funding</span>
+                                        <span class="bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded text-sm">+28%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="insight-card">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="feature-icon text-base">👥</div>
+                                    <h4 class="font-bold text-white">Active Conversations</h4>
+                                </div>
+                                <p class="text-slate-300 text-sm">32 active discussions happening right now</p>
+                                <p class="text-slate-400 text-xs">Peak activity near Main Stage and Coffee Bar</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-4">Sponsor Performance</h3>
+                        <div class="space-y-4">
+                            <div class="roi-metric">
+                                <h4 class="font-bold text-white mb-2">DataCorp Booth</h4>
+                                <div class="metric-value text-purple-400">127</div>
+                                <p class="text-slate-400 text-sm">Quality interactions (8.3min avg)</p>
+                            </div>
+                            
+                            <div class="roi-metric">
+                                <h4 class="font-bold text-white mb-2">AI Solutions Workshop</h4>
+                                <div class="metric-value text-green-400">89%</div>
+                                <p class="text-slate-400 text-sm">Attendee satisfaction rate</p>
+                            </div>
+                            
+                            <div class="roi-metric">
+                                <h4 class="font-bold text-white mb-2">TechFlow Challenge</h4>
+                                <div class="metric-value text-blue-400">43</div>
+                                <p class="text-slate-400 text-sm">Solutions submitted</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 13: Knowledge Graph Visualization -->
+        <section class="slide">
+            <div class="phase-indicator">Knowledge Graph</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Living Knowledge Graph</h2>
+                <div class="glass-box">
+                    <div class="demo-screen p-6">
+                        <h3 class="text-xl font-bold text-white mb-6">Post-Event Knowledge Artifacts</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="solution-step">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="feature-icon text-base">📋</div>
+                                        <h4 class="font-bold text-white">Session: "Scaling Vector DBs"</h4>
+                                    </div>
+                                    <div class="space-y-2 text-sm">
+                                        <p class="text-slate-300">Speaker: Dr. Sarah Chen</p>
+                                        <p class="text-slate-400">Duration: 45 min | Engagement: 94%</p>
+                                        <div class="flex gap-2">
+                                            <span class="bg-blue-500/20 text-blue-300 px-2 py-1 rounded text-xs">Transcript</span>
+                                            <span class="bg-green-500/20 text-green-300 px-2 py-1 rounded text-xs">AI Summary</span>
+                                            <span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">Q&A (12)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="solution-step">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="feature-icon text-base">💎</div>
+                                        <h4 class="font-bold text-white">Knowledge Artifact</h4>
+                                    </div>
+                                    <div class="bg-slate-800/50 p-3 rounded text-sm">
+                                        <p class="text-slate-300 italic">"The key insight is that vector similarity search performance degrades exponentially after 10M vectors without proper indexing strategies."</p>
+                                        <p class="text-slate-400 text-xs mt-2">Minted by: Alex Rodriguez | From: Scaling Vector DBs</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="solution-step">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="feature-icon text-base">🔗</div>
+                                        <h4 class="font-bold text-white">Connection Insights</h4>
+                                    </div>
+                                    <div class="space-y-2 text-sm">
+                                        <p class="text-slate-300">You and 3 others highly engaged with performance optimization topics</p>
+                                        <div class="flex -space-x-2">
+                                            <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-slate-900"></div>
+                                            <div class="w-8 h-8 bg-green-500 rounded-full border-2 border-slate-900"></div>
+                                            <div class="w-8 h-8 bg-purple-500 rounded-full border-2 border-slate-900"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="solution-step">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="feature-icon text-base">🌊</div>
+                                        <h4 class="font-bold text-white">Insight Streams</h4>
+                                    </div>
+                                    <div class="space-y-2 text-sm text-slate-300">
+                                        <p>• This concept was referenced in 5 follow-up discussions</p>
+                                        <p>• 2 startups pivoted based on this insight</p>
+                                        <p>• Related paper published 3 weeks later</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 14: Technology Stack -->
+        <section class="slide">
+            <div class="phase-indicator">Technology</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Advanced Technology Stack</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">AI/ML Core</h3>
+                        <div class="space-y-3">
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">NLP Pipeline</h4>
+                                <p class="text-xs text-slate-300">Real-time transcript analysis & topic extraction</p>
+                            </div>
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">Recommendation Engine</h4>
+                                <p class="text-xs text-slate-300">Multi-dimensional user similarity matching</p>
+                            </div>
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">Knowledge Graph</h4>
+                                <p class="text-xs text-slate-300">Neo4j-powered relationship mapping</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Real-Time Infrastructure</h3>
+                        <div class="space-y-3">
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">WebSocket Connections</h4>
+                                <p class="text-xs text-slate-300">Live event data & notifications</p>
+                            </div>
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">BLE Beacons</h4>
+                                <p class="text-xs text-slate-300">Proximity-based interaction tracking</p>
+                            </div>
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">Event Streaming</h4>
+                                <p class="text-xs text-slate-300">Apache Kafka for data processing</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Security & Scale</h3>
+                        <div class="space-y-3">
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">OAuth 2.0</h4>
+                                <p class="text-xs text-slate-300">Secure authentication flow</p>
+                            </div>
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">Microservices</h4>
+                                <p class="text-xs text-slate-300">Kubernetes-orchestrated scaling</p>
+                            </div>
+                            <div class="tech-stack-item">
+                                <h4 class="font-bold text-white">Privacy-First</h4>
+                                <p class="text-xs text-slate-300">Differential privacy & data anonymization</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 15: ROI Metrics & Success Stories -->
+        <section class="slide">
+            <div class="phase-indicator">Success Metrics</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Proven Impact & ROI</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <div class="metric-card">
+                        <div class="metric-value gradient-text">340%</div>
+                        <p class="text-slate-300 font-semibold">Increase in meaningful connections</p>
+                        <p class="text-slate-400 text-sm">vs traditional networking events</p>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-value gradient-text">89%</div>
+                        <p class="text-slate-300 font-semibold">Knowledge retention rate</p>
+                        <p class="text-slate-400 text-sm">6 months post-event</p>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-value gradient-text">$2.3M</div>
+                        <p class="text-slate-300 font-semibold">Average sponsor ROI</p>
+                        <p class="text-slate-400 text-sm">per major conference</p>
+                    </div>
+                </div>
+                
+                <div class="glass-box">
+                    <h3 class="text-xl font-bold text-white mb-6">Success Stories</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="insight-card">
+                            <h4 class="font-bold text-white mb-2">TechCrunch Disrupt 2024</h4>
+                            <p class="text-slate-300 text-sm mb-3">"Using the platform, our 5,000 attendees formed 23 ongoing project groups. 12 companies were founded directly from connections made through the Serendipity Engine."</p>
+                            <p class="text-slate-400 text-xs">- Sarah Johnson, Event Director</p>
+                        </div>
+                        
+                        <div class="insight-card">
+                            <h4 class="font-bold text-white mb-2">AI Conference London</h4>
+                            <p class="text-slate-300 text-sm mb-3">"The Knowledge Graph captured 847 insights that became the foundation for our ongoing research community. 6 months later, it's still driving 40% of our platform engagement."</p>
+                            <p class="text-slate-400 text-xs">- Dr. Michael Chen, Conference Chair</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 16: Market Opportunity -->
+        <section class="slide">
+            <div class="phase-indicator">Market Analysis</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Massive Market Opportunity</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Market Size</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">Global Events Industry</span>
+                                <span class="text-green-300 font-bold">$1.1T</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">Event Management Software</span>
+                                <span class="text-blue-300 font-bold">$6.4B</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">Corporate Event Budgets</span>
+                                <span class="text-purple-300 font-bold">$325B</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-bold text-white mb-3">Target Segments</h4>
+                            <div class="space-y-2 text-sm">
+                                <p class="text-slate-300">• 50,000+ professional conferences annually</p>
+                                <p class="text-slate-300">• 2.3M corporate events per year</p>
+                                <p class="text-slate-300">• 180,000+ trade shows globally</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Revenue Projections</h3>
+                        <div class="chart-container">
+                            <canvas id="revenueProjectionChart"></canvas>
+                        </div>
+                        
+                        <div class="mt-6 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300">Year 1 Revenue</span>
+                                <span class="text-green-300 font-bold">$2.4M</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300">Year 3 Revenue</span>
+                                <span class="text-blue-300 font-bold">$47M</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-slate-300">Year 5 Revenue</span>
+                                <span class="text-purple-300 font-bold">$240M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 17: Competitive Advantage -->
+        <section class="slide">
+            <div class="phase-indicator">Competitive Edge</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Unfair Competitive Advantages</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">vs Traditional Platforms</h3>
+                        <div class="space-y-4">
+                            <div class="journey-step">
+                                <h4 class="font-bold text-white mb-2">Eventbrite, Meetup</h4>
+                                <p class="text-slate-300 text-sm">❌ Static event listings</p>
+                                <p class="text-slate-300 text-sm">❌ No intelligence layer</p>
+                                <p class="text-slate-300 text-sm">❌ Zero post-event value</p>
+                            </div>
+                            
+                            <div class="solution-step">
+                                <h4 class="font-bold text-white mb-2">Our Platform</h4>
+                                <p class="text-slate-300 text-sm">✅ Living, evolving experiences</p>
+                                <p class="text-slate-300 text-sm">✅ AI-powered insights & matching</p>
+                                <p class="text-slate-300 text-sm">✅ Persistent knowledge ecosystem</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Data Moats</h3>
+                        <div class="space-y-4">
+                            <div class="feature-item">
+                                <div class="feature-icon">🧠</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Engagement Intelligence</h5>
+                                    <p class="text-sm text-slate-400">Proprietary algorithms for measuring true event impact and ROI</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">🕸️</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Social Graph Learning</h5>
+                                    <p class="text-sm text-slate-400">Each event strengthens our recommendation engine across all future events</p>
+                                </div>
+                            </div>
+                            
+                            <div class="feature-item">
+                                <div class="feature-icon">💎</div>
+                                <div>
+                                    <h5 class="font-bold text-white">Knowledge Network Effects</h5>
+                                    <p class="text-sm text-slate-400">Cumulative intellectual assets create switching costs for communities</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 18: Implementation Roadmap -->
+        <section class="slide">
+            <div class="phase-indicator">Roadmap</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Implementation Roadmap</h2>
+                <div class="space-y-6">
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon">🎯</div>
+                            <h3 class="text-xl font-bold text-white">Phase 1: Kismet MVP (Months 1-6)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Core Features</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• Google OAuth integration</li>
+                                    <li>• Profile management</li>
+                                    <li>• Basic attendee discovery</li>
+                                    <li>• Mobile-responsive design</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">AI Features</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• Simple recommendation engine</li>
+                                    <li>• Interest-based matching</li>
+                                    <li>• Search & filtering</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Target Market</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• 50-500 person events</li>
+                                    <li>• Tech meetups & conferences</li>
+                                    <li>• Freemium model launch</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon">📈</div>
+                            <h3 class="text-xl font-bold text-white">Phase 2: Resonance Integration (Months 7-12)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Analytics Engine</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• Real-time engagement tracking</li>
+                                    <li>• Sponsor intelligence dashboard</li>
+                                    <li>• ROI measurement tools</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Advanced Features</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• BLE beacon integration</li>
+                                    <li>• Influence graph visualization</li>
+                                    <li>• Automated reporting</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Enterprise Sales</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• Large conference partnerships</li>
+                                    <li>• Sponsor-focused pricing</li>
+                                    <li>• Custom integration support</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="solution-step">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="feature-icon">♾️</div>
+                            <h3 class="text-xl font-bold text-white">Phase 3: Continuum Knowledge Graph (Months 13-18)</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Knowledge Capture</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• AI transcription & summarization</li>
+                                    <li>• Knowledge artifact minting</li>
+                                    <li>• Persistent community spaces</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Graph Intelligence</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• Connection provenance tracking</li>
+                                    <li>• Cross-event insight streams</li>
+                                    <li>• Research intelligence tools</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-300 mb-2">Market Expansion</h4>
+                                <ul class="text-slate-400 space-y-1">
+                                    <li>• Academic conferences</li>
+                                    <li>• Enterprise knowledge sharing</li>
+                                    <li>• API & ecosystem partners</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 19: Financial Projections -->
+        <section class="slide">
+            <div class="phase-indicator">Financials</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Financial Projections & Unit Economics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Revenue Streams</h3>
+                        <div class="space-y-4">
+                            <div class="roi-metric">
+                                <h4 class="font-bold text-white">Kismet Subscriptions</h4>
+                                <div class="text-2xl font-bold text-blue-400">$19/month</div>
+                                <p class="text-slate-400 text-sm">Power networker features</p>
+                            </div>
+                            
+                            <div class="roi-metric">
+                                <h4 class="font-bold text-white">Resonance Enterprise</h4>
+                                <div class="text-2xl font-bold text-green-400">$5K-50K</div>
+                                <p class="text-slate-400 text-sm">Per event analytics package</p>
+                            </div>
+                            
+                            <div class="roi-metric">
+                                <h4 class="font-bold text-white">Continuum Platform</h4>
+                                <div class="text-2xl font-bold text-purple-400">$2K-25K</div>
+                                <p class="text-slate-400 text-sm">Knowledge graph & community</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Unit Economics</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">Customer Acquisition Cost</span>
+                                <span class="text-red-300 font-bold">$127</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">Average Customer LTV</span>
+                                <span class="text-green-300 font-bold">$4,680</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">LTV:CAC Ratio</span>
+                                <span class="text-blue-300 font-bold">36.8:1</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                <span class="text-slate-300">Gross Margin</span>
+                                <span class="text-purple-300 font-bold">89%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="font-bold text-white mb-3">Growth Metrics</h4>
+                            <div class="space-y-2 text-sm">
+                                <p class="text-slate-300">Monthly Churn Rate: <span class="text-green-300">2.1%</span></p>
+                                <p class="text-slate-300">Net Revenue Retention: <span class="text-blue-300">147%</span></p>
+                                <p class="text-slate-300">Organic Growth Rate: <span class="text-purple-300">67%</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 20: Team & Funding -->
+        <section class="slide">
+            <div class="phase-indicator">Investment</div>
+            <div class="max-w-6xl w-full">
+                <h2 class="text-4xl font-bold text-white mb-12 text-center">Investment Opportunity</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Funding Requirements</h3>
+                        <div class="space-y-4">
+                            <div class="metric-card">
+                                <div class="metric-value gradient-text">$8.5M</div>
+                                <p class="text-slate-300 font-semibold">Series A Target</p>
+                                <p class="text-slate-400 text-sm">18-month runway</p>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                    <span class="text-slate-300">Engineering (60%)</span>
+                                    <span class="text-blue-300 font-bold">$5.1M</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                    <span class="text-slate-300">Sales & Marketing (25%)</span>
+                                    <span class="text-green-300 font-bold">$2.1M</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-slate-800/50 rounded">
+                                    <span class="text-slate-300">Operations (15%)</span>
+                                    <span class="text-purple-300 font-bold">$1.3M</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass-box">
+                        <h3 class="text-xl font-bold text-white mb-6">Investor Benefits</h3>
+                        <div class="space-y-4">
+                            <div class="insight-card">
+                                <h4 class="font-bold text-white mb-2">Market Timing</h4>
+                                <p class="text-slate-300 text-sm">Post-pandemic shift to hybrid events creates massive demand for intelligent event platforms</p>
+                            </div>
+                            
+                            <div class="insight-card">
+                                <h4 class="font-bold text-white mb-2">Defensible Moats</h4>
+                                <p class="text-slate-300 text-sm">Network effects, data advantages, and switching costs create natural monopoly dynamics</p>
+                            </div>
+                            
+                            <div class="insight-card">
+                                <h4 class="font-bold text-white mb-2">Expansion Potential</h4>
+                                <p class="text-slate-300 text-sm">Platform scales to corporate learning, professional communities, and knowledge management</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Slide 21: Call to Action -->
+        <section class="slide text-center">
+            <div class="phase-indicator">Next Steps</div>
+            <div class="max-w-4xl w-full">
+                <h2 class="text-5xl font-bold gradient-text mb-8">Join the Revolution</h2>
+                <p class="text-xl text-slate-300 mb-12">Transform how humanity gathers, connects, and learns together</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                    <div class="glass-box text-center">
+                        <div class="text-4xl mb-4">🎯</div>
+                        <h3 class="text-xl font-bold text-white mb-2">For Investors</h3>
+                        <p class="text-slate-400 text-sm">Join our Series A round and help build the future of intelligent events</p>
+                    </div>
+                    
+                    <div class="glass-box text-center">
+                        <div class="text-4xl mb-4">🤝</div>
+                        <h3 class="text-xl font-bold text-white mb-2">For Partners</h3>
+                        <p class="text-slate-400 text-sm">Integrate our platform into your events and unlock unprecedented insights</p>
+                    </div>
+                    
+                    <div class="glass-box text-center">
+                        <div class="text-4xl mb-4">🚀</div>
+                        <h3 class="text-xl font-bold text-white mb-2">For Talent</h3>
+                        <p class="text-slate-400 text-sm">Join our team and help solve the most fundamental challenge in human connection</p>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-white mb-4">Ready to transform events forever?</p>
+                    <div class="space-x-4">
+                        <button class="auth-button">Schedule Demo</button>
+                        <button class="bg-transparent border-2 border-blue-500 text-blue-300 px-6 py-3 rounded-lg hover:bg-blue-500/10 transition-all">View Pitch Deck</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Navigation functionality
+        const navDots = document.querySelectorAll('.nav-dot');
+        const slides = document.querySelectorAll('.slide');
+        
+        navDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        
+        // Update active navigation dot based on scroll position
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const slideIndex = Array.from(slides).indexOf(entry.target);
+                    navDots.forEach(dot => dot.classList.remove('active'));
+                    if (navDots[slideIndex]) {
+                        navDots[slideIndex].classList.add('active');
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        slides.forEach(slide => observer.observe(slide));
+        
+        // Chart configurations
+        Chart.defaults.color = '#e5e7eb';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        Chart.defaults.backgroundColor = 'rgba(96, 165, 250, 0.1)';
+        
+        // Kismet Discovery Chart
+        const kismetCtx = document.getElementById('kismetDiscoveryChart');
+        if (kismetCtx) {
+            new Chart(kismetCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Relevance', 'Serendipity', 'Timing', 'Context', 'Follow-up'],
+                    datasets: [{
+                        label: 'Traditional Platforms',
+                        data: [30, 10, 20, 15, 5],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    }, {
+                        label: 'Kismet Platform',
+                        data: [95, 88, 92, 89, 94],
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { display: false },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+        
+        // Resonance ROI Chart
+        const resonanceCtx = document.getElementById('resonanceRoiChart');
+        if (resonanceCtx) {
+            new Chart(resonanceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Brand Exposure', 'Lead Quality', 'Engagement Depth', 'Conversion Rate'],
+                    datasets: [{
+                        label: 'Before Resonance',
+                        data: [45, 23, 15, 3.2],
+                        backgroundColor: 'rgba(239, 68, 68, 0.5)',
+                    }, {
+                        label: 'After Resonance',
+                        data: [78, 67, 89, 12.7],
+                        backgroundColor: 'rgba(96, 165, 250, 0.5)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+        
+        // Continuum Knowledge Chart
+        const continuumCtx = document.getElementById('continuumKnowledgeChart');
+        if (continuumCtx) {
+            new Chart(continuumCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Week 1', 'Month 1', 'Month 3', 'Month 6', 'Year 1'],
+                    datasets: [{
+                        label: 'Traditional Events',
+                        data: [100, 45, 20, 8, 3, 1],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Continuum Events',
+                        data: [100, 95, 87, 82, 78, 74],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Knowledge Retention %'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Revenue Projection Chart
+        const revenueCtx = document.getElementById('revenueProjectionChart');
+        if (revenueCtx) {
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5'],
+                    datasets: [{
+                        label: 'Revenue ($M)',
+                        data: [2.4, 12.8, 47.2, 134.7, 240.3],
+                        borderColor: '#60a5fa',
+                        backgroundColor: 'rgba(96, 165, 250, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue ($ Millions)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
